@@ -1,5 +1,0 @@
-Due to the inaccess of amazon server I used proxy server.
-for some moments it worked but then it stopped working.
-Before happening this I scraped 16 info about the phone,their ratings and their price.
-
-I again scraped the detail by using rotating user agent concept and it worked
