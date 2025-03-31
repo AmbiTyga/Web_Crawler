@@ -1,7 +1,7 @@
 import json
 import scrapy
 import subprocess
-
+import os
 class SubredditSpider(scrapy.Spider):
     name = 'subreddit_spider'
     
@@ -20,15 +20,18 @@ class SubredditSpider(scrapy.Spider):
     
     # Read subreddit names from a JSON file
     def start_requests(self):
-        previously_parsed = json.load(open("subreddit_details.json"))
-        already_parsed = [g.get('name') for g in previously_parsed]
-        with open('scarpy_reddit_communities.json', 'r') as f:
+        if os.path.exists("/home/ambeshs/Desktop/Github/Web_Crawler/Reddit_Scaper/subreddit_details.json"):
+            previously_parsed = json.load(open("/home/ambeshs/Desktop/Github/Web_Crawler/Reddit_Scaper/subreddit_details.json"))
+            already_parsed = [g.get('name') for g in previously_parsed]
+        else:
+            already_parsed = []
+        with open('/home/ambeshs/Desktop/Github/Web_Crawler/Reddit_Scaper/scrapy_reddit_communities.json', 'r') as f:
             subreddits = json.load(f)
             for subreddit in subreddits[::-1]:
                 subreddit_name = subreddit.get("community_name").replace('r/', '')
                 if subreddit_name in already_parsed:
                     continue
-                url = f'https://www.reddit.com/r/{subreddit_name}/'
+                url = f'https://www.reddit.com/r/{subreddit_name}/new/'
                 yield scrapy.Request(url, callback=self.parse, meta={'subreddit_name': subreddit_name}, errback=self.handle_failure)
 
     def parse(self, response):
@@ -40,6 +43,7 @@ class SubredditSpider(scrapy.Spider):
             'display-name': header.css('::attr(display-name)').get(),
             'description': header.css('::attr(description)').get(),
             'subscribers': header.css('::attr(subscribers)').get(),
+            'created-timestamp': response.css('shreddit-post::attr(created-timestamp)').get()
         }
 
     def handle_failure(self, failure):
